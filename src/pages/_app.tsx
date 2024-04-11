@@ -1,5 +1,6 @@
 import React from "react";
 import type { AppProps } from "next/app";
+import { Analytics } from "@vercel/analytics/react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -61,6 +62,7 @@ function JsonCrack({ Component, pageProps }: AppProps) {
             }}
           />
           <GlobalStyle />
+          <Analytics />
           <Component {...pageProps} />
         </ThemeProvider>
       </MantineProvider>
