@@ -4,7 +4,6 @@ import { Box, Burger, Button, Flex, Menu, Overlay } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import styled from "styled-components";
 import { BiChevronDown } from "react-icons/bi";
-import useUser from "src/store/useUser";
 import { JSONCrackLogo } from "../JsonCrackLogo";
 
 const StyledNavbarWrapper = styled.div`
@@ -49,7 +48,6 @@ const Right = styled.div`
 `;
 
 export const Navbar = () => {
-  const isAuthenticated = useUser(state => state.isAuthenticated);
   const [opened, { toggle }] = useDisclosure();
 
   return (
@@ -148,18 +146,6 @@ export const Navbar = () => {
           </Menu>
         </Left>
         <Right>
-          {!isAuthenticated && (
-            <Button
-              component={Link}
-              href="/sign-in"
-              variant="outline"
-              color="dark"
-              className="hide-mobile"
-              visibleFrom="sm"
-            >
-              Login
-            </Button>
-          )}
           <Button color="dark" component={Link} href="/editor" prefetch={false} visibleFrom="sm">
             Editor
           </Button>

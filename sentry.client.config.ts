@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({
-    dsn: "https://d3345591295d4dd1b8c579b62003d939@o1284435.ingest.sentry.io/6495191",
+    dsn: "https://8cf6a347488043f4f9d3c29deade3e9a@o933729.ingest.us.sentry.io/4507060250935296",
     tracesSampleRate: 0.2,
     debug: false,
     release: `${process.env.SENTRY_RELEASE || "production"}`,

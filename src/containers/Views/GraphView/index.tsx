@@ -173,7 +173,7 @@ export const Graph = ({ isWidget = false }: GraphProps) => {
 
   return (
     <>
-      <Loading loading={loading} message="Painting graph..." />
+      {/* <Loading loading={loading} message="1111..." /> */}
       <StyledEditorWrapper
         $widget={isWidget}
         onContextMenu={e => e.preventDefault()}

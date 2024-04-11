@@ -15,12 +15,10 @@ import { BiSolidDockLeft } from "react-icons/bi";
 import { MdOutlineCheckCircleOutline } from "react-icons/md";
 import { TbTransform } from "react-icons/tb";
 import { VscError, VscFeedback, VscSourceControl, VscSync, VscSyncIgnored } from "react-icons/vsc";
-import { documentSvc } from "src/services/document.service";
 import useConfig from "src/store/useConfig";
 import useFile from "src/store/useFile";
 import useGraph from "src/store/useGraph";
 import useModal from "src/store/useModal";
-import useUser from "src/store/useUser";
 
 const StyledBottomBar = styled.div`
   position: relative;
@@ -88,7 +86,6 @@ const StyledBottomBarItem = styled.button<{ $bg?: string }>`
 export const BottomBar = () => {
   const { query, replace } = useRouter();
   const data = useFile(state => state.fileData);
-  const user = useUser(state => state.user);
   const toggleLiveTransform = useConfig(state => state.toggleLiveTransform);
   const liveTransformEnabled = useConfig(state => state.liveTransformEnabled);
   const hasChanges = useFile(state => state.hasChanges);
@@ -107,74 +104,6 @@ export const BottomBar = () => {
   const [isUpdating, setIsUpdating] = React.useState(false);
 
   const toggleEditor = () => toggleFullscreen(!fullscreen);
-
-  React.useEffect(() => {
-    setIsPrivate(data?.private ?? true);
-  }, [data]);
-
-  const handleSaveJson = React.useCallback(async () => {
-    if (!user) return setVisible("login")(true);
-
-    if (
-      hasChanges &&
-      !error &&
-      (typeof query.json === "string" || typeof query.json === "undefined")
-    ) {
-      try {
-        setIsUpdating(true);
-        toast.loading("Saving document...", { id: "fileSave" });
-
-        const { data, error } = await documentSvc.upsert({
-          id: query?.json,
-          contents: getContents(),
-          format: getFormat(),
-        });
-
-        if (error) throw error;
-        if (data) replace({ query: { json: data } });
-
-        toast.success("Document saved to cloud", { id: "fileSave" });
-        setHasChanges(false);
-      } catch (error: any) {
-        toast.error(error.message, { id: "fileSave" });
-      } finally {
-        setIsUpdating(false);
-      }
-    }
-  }, [
-    error,
-    getContents,
-    getFormat,
-    hasChanges,
-    query.json,
-    replace,
-    setHasChanges,
-    setVisible,
-    user,
-  ]);
-
-  const setPrivate = async () => {
-    try {
-      if (!query.json) return handleSaveJson();
-      setIsUpdating(true);
-
-      const { data: updatedJsonData, error } = await documentSvc.update(query.json as string, {
-        private: !isPrivate,
-      });
-
-      if (error) return toast.error(error.message);
-
-      if (updatedJsonData[0]) {
-        setIsPrivate(updatedJsonData[0].private);
-        toast.success(`Document set to ${isPrivate ? "public" : "private"}.`);
-      } else throw error;
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   return (
     <StyledBottomBar>
       {data?.name && (
@@ -186,13 +115,6 @@ export const BottomBar = () => {
         <StyledBottomBarItem onClick={toggleEditor}>
           <BiSolidDockLeft />
         </StyledBottomBarItem>
-
-        {fileName && (
-          <StyledBottomBarItem onClick={() => setVisible("cloud")(true)}>
-            <VscSourceControl />
-            {fileName}
-          </StyledBottomBarItem>
-        )}
         <StyledBottomBarItem>
           {error ? (
             <Popover width="auto" shadow="md" position="top" withArrow>
@@ -219,18 +141,6 @@ export const BottomBar = () => {
             </Flex>
           )}
         </StyledBottomBarItem>
-        {(data?.owner_email === user?.email || (!data && user)) && (
-          <StyledBottomBarItem onClick={handleSaveJson} disabled={isUpdating || error}>
-            {hasChanges || !user ? <AiOutlineCloudUpload /> : <AiOutlineCloudSync />}
-            {hasChanges || !user ? (query?.json ? "Unsaved Changes" : "Save to Cloud") : "Saved"}
-          </StyledBottomBarItem>
-        )}
-        {data?.owner_email === user?.email && (
-          <StyledBottomBarItem onClick={setPrivate} disabled={isUpdating}>
-            {isPrivate ? <AiOutlineLock /> : <AiOutlineUnlock />}
-            {isPrivate ? "Private" : "Public"}
-          </StyledBottomBarItem>
-        )}
         <StyledBottomBarItem
           onClick={() => setVisible("share")(true)}
           disabled={isPrivate || !data}
@@ -259,10 +169,6 @@ export const BottomBar = () => {
 
       <StyledRight>
         <StyledBottomBarItem>Nodes: {nodeCount}</StyledBottomBarItem>
-        <StyledBottomBarItem onClick={() => setVisible("review")(true)}>
-          <VscFeedback />
-          Feedback
-        </StyledBottomBarItem>
       </StyledRight>
     </StyledBottomBar>
   );
